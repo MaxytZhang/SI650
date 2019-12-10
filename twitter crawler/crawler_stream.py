@@ -22,4 +22,4 @@ auth = OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_secret)
 stream = Stream(auth, l)
 
-stream.filter(track=['Trump', 'Andrew Yang', 'Biden'], languages=["en"])
+stream.filter(track=['Andrew Yang'], languages=["en"])
