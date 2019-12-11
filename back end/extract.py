@@ -102,17 +102,24 @@ def extract_kmeans(filename,query,doc_size,true_k,n,load_model=False):
     length = true_k
     # length = len(set(model.labels_))
     term_list = []
+    sum_weight = 0
 
     for i in range(length):
         print("Cluster %d:" % i),
         for ind in order_centroids[i, :n]:
             if terms[ind] not in term_list:
                 print(' %s' % terms[ind])
-                result.append({'word':terms[ind],'weight':str(weight_dict[terms[ind]])})
+                result.append({'word':terms[ind],'weight':weight_dict[terms[ind]]})
                 term_list.append(terms[ind])
+                sum_weight += weight_dict[terms[ind]]
         print
+    
+    for r in result:
+        r['weight'] = str(r['weight']/sum_weight)
+    
+    # normalize
 
-    print("\n")
+
     return result
 
 # if __name__ == "__main__":
