@@ -72,7 +72,7 @@ def extract_kmeans(filename,query,doc_size,true_k,n,load_model=False):
         text_filtering, query_lst = filter_text(text, query)
         corpus = preproccessing(text_filtering, doc_size, query_lst)
 
-        vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(2,3))
+        vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(3,3))
         X = vectorizer.fit_transform(corpus)
         # save weight
         weight = vectorizer.vocabulary_.items()
@@ -86,10 +86,10 @@ def extract_kmeans(filename,query,doc_size,true_k,n,load_model=False):
         with open(wordfile, 'wb') as filehandle:
             pickle.dump(terms, filehandle)
 
-        # model = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1)
-        # model.fit(X)
-        from sklearn.cluster import MeanShift
-        model = MeanShift(bandwidth=2).fit(X.toarray())
+        model = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1)
+        model.fit(X)
+        # from sklearn.cluster import MeanShift
+        # model = MeanShift(bandwidth=2).fit(X.toarray())
         
         
         filehandler = open(modelfile, 'wb')
@@ -99,8 +99,8 @@ def extract_kmeans(filename,query,doc_size,true_k,n,load_model=False):
     order_centroids = (-model.cluster_centers_).argsort()[:, ::-1]
     
     result = []
-    # length = true_k
-    length = len(set(model.labels_))
+    length = true_k
+    # length = len(set(model.labels_))
 
     for i in range(length):
         print("Cluster %d:" % i),
@@ -113,6 +113,6 @@ def extract_kmeans(filename,query,doc_size,true_k,n,load_model=False):
     print("\n")
     return result
 
-if __name__ == "__main__":
-    query = "Andrew Yang"
-    print(extract_kmeans('1210election.data',query,10,3,10,False))
+# if __name__ == "__main__":
+#     query = "Andrew Yang"
+#     print(extract_kmeans('1210election.data',query,10,3,10,False))
