@@ -31,7 +31,7 @@ def preproccessing(text,k,query_lst=[]):
     count = 0
     doc = " "
     for t in text:
-        p.set_options(p.OPT.URL, p.OPT.EMOJI,p.OPT.MENTION)
+        # p.set_options(p.OPT.URL, p.OPT.EMOJI,p.OPT.MENTION)
         sent = p.clean(t)
         word_tokens = word_tokenize(sent) 
         filtered_sentence = [w for w in word_tokens if not w in stop_words]
@@ -48,12 +48,12 @@ def preproccessing(text,k,query_lst=[]):
 def filter_text(text, query):
     query_nopunc = re.sub(r'[^\w\s]','', query)
     query_lst = query_nopunc.lower().split()
-    query_lst += query_nopunc.split()    
+    # query_lst += query_nopunc.split()    
     
     result = []
     for t in text:
         for q in query_lst:
-            if q in t:
+            if q in t.lower():
                 result.append(t)
                 break
     
@@ -88,7 +88,7 @@ def extract_kmeans(filename,query,doc_size,true_k,n,load_model=False):
 
         model = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1)
         model.fit(X)
-        # from sklearn.cluster import MeanShift
+        from sklearn.cluster import MeanShift
         # model = MeanShift(bandwidth=2).fit(X.toarray())
         
         
@@ -101,16 +101,25 @@ def extract_kmeans(filename,query,doc_size,true_k,n,load_model=False):
     result = []
     length = true_k
     # length = len(set(model.labels_))
+    term_list = []
+    sum_weight = 0
 
     for i in range(length):
         print("Cluster %d:" % i),
         for ind in order_centroids[i, :n]:
-            print(' %s' % terms[ind])
-            result.append({'word':terms[ind],'weight':str(weight_dict[terms[ind]])})
-            # result[terms[ind]] = str(weight_dict[terms[ind]])
+            if terms[ind] not in term_list:
+                print(' %s' % terms[ind])
+                result.append({'word':terms[ind],'weight':weight_dict[terms[ind]]})
+                term_list.append(terms[ind])
+                sum_weight += weight_dict[terms[ind]]
         print
+    
+    for r in result:
+        r['weight'] = str(r['weight']/sum_weight)
+    
+    # normalize
 
-    print("\n")
+
     return result
 
 # if __name__ == "__main__":

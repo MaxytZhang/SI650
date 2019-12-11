@@ -30,8 +30,12 @@ def rank():
 @app.route('/keyword/', methods=['GET', 'POST'])
 def extract_keywords():
     res = request.json
-    print(res)
-    query = "Andrew Yang"
-    keywords = extract_kmeans('1210election.data',query,10,3,3,False)
+    # print(res['key'])
+    query = "andrew yang"
+    filename = '1210election.data'
+    try:
+        keywords = extract_kmeans(filename,res['key'],10,3,5,False)
+    except:
+        keywords = []
     print(keywords)
     return jsonify(keywords)
