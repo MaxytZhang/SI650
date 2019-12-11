@@ -22,4 +22,4 @@ auth = OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_secret)
 stream = Stream(auth, l)
 
-stream.filter(track=['Andrew Yang'], languages=["en"])
+stream.filter(track=['Andrew Yang'], languages=["en"], is_async=True)
