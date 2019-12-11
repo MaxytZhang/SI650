@@ -22,8 +22,8 @@ def rn_test():
 @app.route('/rank/', methods = ['GET', 'POST'])
 def rank():
     res = request.json
-
-    rank = bm25_rank(res["key"], 10)
+    print(res)
+    rank = bm25_rank(res["key"], res["num"])
     print(rank)
     return jsonify(rank)
 

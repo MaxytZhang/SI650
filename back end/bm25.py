@@ -13,7 +13,7 @@ def bm25_rank(query_str, k):
 
     data = pd.read_csv("./data/rank.csv")
     data["score"] = scores
-    top10 = pd.unique(data.sort_values(by=['score'], ascending=False)["text_processed"])[:k].tolist()
+    top10 = pd.unique(data.sort_values(by=['score'], ascending=False)[data['score'] != 0]["text_processed"])[:k].tolist()
     res = {
         "res": top10
     }
