@@ -61,8 +61,12 @@ def filter_text(text, query):
 
 def extract_kmeans(filename,query,doc_size,true_k,n,load_model=False):
     modelfile = 'keyextraction_model.pkl'
+    weightfile = 'word_weight.data'
+    wordfile = 'term.data'
     if (load_model):
         model = pickle.load(open(modelfile, 'rb'))
+        weight_dict = pickle.load(open(weightfile,'rb'))
+        terms = pickle.load(open(wordfile,'rb'))
     else:
         text = load_text(filename)
         text_filtering, query_lst = filter_text(text, query)
@@ -70,27 +74,45 @@ def extract_kmeans(filename,query,doc_size,true_k,n,load_model=False):
 
         vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(2,3))
         X = vectorizer.fit_transform(corpus)
+        # save weight
+        weight = vectorizer.vocabulary_.items()
+        weight_dict = {}
+        for w in weight:
+            weight_dict[w[0]] = w[1]
+        with open(weightfile, 'wb') as filehandle:
+            pickle.dump(weight_dict, filehandle)
+        # save terms
+        terms = vectorizer.get_feature_names()
+        with open(wordfile, 'wb') as filehandle:
+            pickle.dump(terms, filehandle)
 
-        model = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1)
-        model.fit(X)
+        # model = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1)
+        # model.fit(X)
+        from sklearn.cluster import MeanShift
+        model = MeanShift(bandwidth=2).fit(X.toarray())
+        
         
         filehandler = open(modelfile, 'wb')
         pickle.dump(model, filehandler)
 
     print("Top terms per cluster:")
-    order_centroids = model.cluster_centers_.argsort()[:, ::-1]
-    terms = vectorizer.get_feature_names()
+    order_centroids = (-model.cluster_centers_).argsort()[:, ::-1]
+    
     result = []
-    for i in range(true_k):
+    # length = true_k
+    length = len(set(model.labels_))
+
+    for i in range(length):
         print("Cluster %d:" % i),
         for ind in order_centroids[i, :n]:
-            print(' %s' % terms[ind]),
-            result.append(terms[ind])
+            print(' %s' % terms[ind])
+            result.append({'word':terms[ind],'weight':str(weight_dict[terms[ind]])})
+            # result[terms[ind]] = str(weight_dict[terms[ind]])
         print
 
     print("\n")
-    return list(set(result))
+    return result
 
-# if __name__ == "__main__":
-#     query = "Andrew Yang"
-#     print(extract_kmeans('1210election.data',query,10,3,3,True))
+if __name__ == "__main__":
+    query = "Andrew Yang"
+    print(extract_kmeans('1210election.data',query,10,3,10,False))
